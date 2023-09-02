@@ -14,6 +14,7 @@ type App interface {
 	Description() string
 	Setup() error
 	Register(r *chi.Mux)
+	UseMiddleware(r *chi.Mux)
 }
 
 type BaseApp struct {
@@ -21,6 +22,7 @@ type BaseApp struct {
 	Info         string
 	RouteHandler func(r *chi.Mux)
 	SetupHandler func() error
+	Middlewares  chi.Middlewares
 }
 
 func (app *BaseApp) Name() string {
@@ -32,7 +34,7 @@ func (app *BaseApp) Description() string {
 }
 
 func (app *BaseApp) Setup() error {
-	fmt.Printf("Configuring the %v app", app.Name())
+	fmt.Printf("Configuring the %v app\n", app.Name())
 	err := app.SetupHandler()
 	if err != nil {
 		return err
@@ -42,6 +44,10 @@ func (app *BaseApp) Setup() error {
 
 func (app *BaseApp) Register(r *chi.Mux) {
 	app.RouteHandler(r)
+}
+
+func (app *BaseApp) UseMiddleware(r *chi.Mux) {
+	r.Use(app.Middlewares...)
 }
 
 func SetupApps() {
@@ -59,5 +65,12 @@ func RegisterApps(r *chi.Mux) {
 	fmt.Println("Registering apps...")
 	for _, app := range Apps {
 		app.Register(r)
+	}
+}
+
+func RegisterAppsMiddleware(r *chi.Mux) {
+	fmt.Println("Registering middleware...")
+	for _, app := range Apps {
+		app.UseMiddleware(r)
 	}
 }
