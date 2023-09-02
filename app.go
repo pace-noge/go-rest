@@ -3,6 +3,7 @@ package gorest
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -22,7 +23,7 @@ type BaseApp struct {
 	Info         string
 	RouteHandler func(r *chi.Mux)
 	SetupHandler func() error
-	Middlewares  chi.Middlewares
+	Middlewares  []func(http.Handler) http.Handler
 }
 
 func (app *BaseApp) Name() string {
@@ -47,7 +48,9 @@ func (app *BaseApp) Register(r *chi.Mux) {
 }
 
 func (app *BaseApp) UseMiddleware(r *chi.Mux) {
-	r.Use(app.Middlewares...)
+	for _, middleware := range app.Middlewares {
+		r.Use(middleware)
+	}
 }
 
 func SetupApps() {
