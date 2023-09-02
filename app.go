@@ -15,7 +15,6 @@ type App interface {
 	Description() string
 	Setup() error
 	Register(r *chi.Mux)
-	UseMiddleware(r *chi.Mux)
 }
 
 type BaseApp struct {
@@ -47,12 +46,6 @@ func (app *BaseApp) Register(r *chi.Mux) {
 	app.RouteHandler(r)
 }
 
-func (app *BaseApp) UseMiddleware(r *chi.Mux) {
-	for _, middleware := range app.Middlewares {
-		r.Use(middleware)
-	}
-}
-
 func SetupApps() {
 	fmt.Println("Configuring apps...")
 	for _, app := range Apps {
@@ -68,12 +61,5 @@ func RegisterApps(r *chi.Mux) {
 	fmt.Println("Registering apps...")
 	for _, app := range Apps {
 		app.Register(r)
-	}
-}
-
-func RegisterAppsMiddleware(r *chi.Mux) {
-	fmt.Println("Registering middleware...")
-	for _, app := range Apps {
-		app.UseMiddleware(r)
 	}
 }
